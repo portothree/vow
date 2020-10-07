@@ -1,0 +1,26 @@
+{
+	"name": "vow",
+	"version": "1.0.0",
+	"description": "Custom promise implementation inspired by [Nicholas C. Zakas](https://humanwhocodes.com) project called [Pledge](https://github.com/humanwhocodes/pledge) that implements JavaScript promises that matches the ECMA-262 specification as closely as possible.",
+	"main": "index.js",
+	"scripts": {
+		"test": "jest",
+		"test:watch": "jest --watch",
+		"dev": "parcel vow.js",
+		"build": "parcel build vow.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/portothree/vow.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/portothree/vow/issues"
+	},
+	"homepage": "https://github.com/portothree/vow#readme",
+	"devDependencies": {
+		"jest": "^26.5.2"
+	}
+}

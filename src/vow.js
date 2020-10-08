@@ -37,8 +37,7 @@ function createResolvingFunctions(vow) {
 		vow[VowSymbol.result] = resolution;
 	};
 	const reject = reason => {
-		vow[VowSymbol.state] = 'rejected';
-		vow[VowSymbol.result] = reason;
+		rejectVow(vow, reason);
 	};
 
 	/*
@@ -55,4 +54,21 @@ function createResolvingFunctions(vow) {
 	reject.vow = vow;
 
 	return { resolve, reject };
+}
+
+/*
+ * Based on specification 25.6.1.7 RejectPromise
+ *
+ * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-rejectpromise}
+ */
+function rejectVow(vow, reason) {
+	// Assert the value of [[VowState]] is pending
+	if (vow[VowSymbol.state] !== 'pending') {
+		throw new Error('Vow is already settled.');
+	}
+
+	vow[VowSymbol.result] = reason;
+	vow[VowSymbol.fulfillReactions] = undefined;
+	vow[VowSymbol.rejectReactions] = undefined;
+	vow[VowSymbol.state] = 'rejected';
 }

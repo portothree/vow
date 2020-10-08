@@ -31,23 +31,40 @@ export class Vow {
 	}
 }
 
+/**
+ * spec 25.6.1.3 CreateResolvingFunctions
+ *
+ * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-createresolvingfunctions}
+ */
 function createResolvingFunctions(vow) {
+	/**
+	 * alreadyResolved Record { [[Value]]: false }
+	 * in a object so ensures the same value is being read
+	 * and modified regardless of location
+	 *
+	 */
+	const alreadyResolved = { value: false };
+
 	const resolve = resolution => {
 		vow[VowSymbol.state] = 'fulfilled';
 		vow[VowSymbol.result] = resolution;
 	};
 	const reject = reason => {
-		rejectVow(vow, reason);
+		if (alreadyResolved.value) {
+			return;
+		}
+
+		alreadyResolved.value = true;
+
+		return rejectVow(vow, reason);
 	};
 
-	/*
+	/**
 	 * The specification indicates that the `resolve` and `reject`
 	 * functions should have properties containing `alreadyResolved`
 	 * and the original promise (vow)
 	 *
-	 * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-createresolvingfunctions}
 	 */
-	const alreadyResolved = { value: false };
 	resolve.alreadyResolved = alreadyResolved;
 	resolve.vow = vow;
 	reject.alreadyResolved = alreadyResolved;
@@ -56,7 +73,7 @@ function createResolvingFunctions(vow) {
 	return { resolve, reject };
 }
 
-/*
+/**
  * Based on specification 25.6.1.7 RejectPromise
  *
  * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-rejectpromise}

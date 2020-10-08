@@ -20,7 +20,7 @@ export class Vow {
 		this[VowSymbol.fulfillReactions] = [];
 		this[VowSymbol.rejectReactions] = [];
 
-		const { resolve, reject } = createResolvingFunctions(vow);
+		const { resolve, reject } = createResolvingFunctions(this);
 
 		// The executor is executed immediately
 		try {
@@ -32,8 +32,14 @@ export class Vow {
 }
 
 function createResolvingFunctions(vow) {
-	const resolve = resolution => {};
-	const reject = reason => {};
+	const resolve = resolution => {
+		vow[VowSymbol.state] = 'fulfilled';
+		vow[VowSymbol.result] = resolution;
+	};
+	const reject = reason => {
+		vow[VowSymbol.state] = 'rejected';
+		vow[VowSymbol.result] = reason;
+	};
 
 	return { resolve, reject };
 }

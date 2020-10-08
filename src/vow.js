@@ -41,5 +41,18 @@ function createResolvingFunctions(vow) {
 		vow[VowSymbol.result] = reason;
 	};
 
+	/*
+	 * The specification indicates that the `resolve` and `reject`
+	 * functions should have properties containing `alreadyResolved`
+	 * and the original promise (vow)
+	 *
+	 * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-createresolvingfunctions}
+	 */
+	const alreadyResolved = { value: false };
+	resolve.alreadyResolved = alreadyResolved;
+	resolve.vow = vow;
+	reject.alreadyResolved = alreadyResolved;
+	reject.vow = vow;
+
 	return { resolve, reject };
 }

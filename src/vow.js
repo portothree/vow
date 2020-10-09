@@ -1,5 +1,5 @@
 import { VowSymbol } from './vow-symbol';
-import { isCallable } from './utils.js';
+import { isCallable, isObject } from './utils.js';
 
 export class Vow {
 	constructor(executor) {
@@ -46,8 +46,21 @@ function createResolvingFunctions(vow) {
 	const alreadyResolved = { value: false };
 
 	const resolve = resolution => {
-		vow[VowSymbol.state] = 'fulfilled';
-		vow[VowSymbol.result] = resolution;
+		if (alreadyResolved.value) {
+			return;
+		}
+
+		alreadyResolved.value = true;
+
+		// can't resolve to the same vow
+		if (Object.is(resolution, vow)) {
+			return rejectVow(vow, new TypeError('Cannot resolve to self.'));
+		}
+
+		// Non object values auto fulfill the vow with the resolution value
+		if (!isObject(resolution)) {
+			return fulfillVow(vow, resolution);
+		}
 	};
 	const reject = reason => {
 		if (alreadyResolved.value) {
@@ -88,4 +101,21 @@ function rejectVow(vow, reason) {
 	vow[VowSymbol.fulfillReactions] = undefined;
 	vow[VowSymbol.rejectReactions] = undefined;
 	vow[VowSymbol.state] = 'rejected';
+}
+
+/**
+ * Based on specification 25.6.1.4 FulfillPromise
+ *
+ * @see {@link https://www.ecma-international.org/ecma-262/11.0/index.html#sec-fulfillpromise}
+ */
+function fulfillVow(vow, value) {
+	// Assert the value of [[VowState]] is pending
+	if (vow[VowSymbol.state] !== 'pending') {
+		throw new Error('Vow is already settled.');
+	}
+
+	vow[VowSymbol.result] = value;
+	vow[VowSymbol.fulfillReactions] = undefined;
+	vow[VowSymbol.rejectReactions] = undefined;
+	vow[VowSymbol.state] = 'fulfilled';
 }
